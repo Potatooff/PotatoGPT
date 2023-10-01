@@ -2,27 +2,30 @@
 from json import load as load_json
 from pickle import dump, load
 from numpy import array
-from src.utils.preloader import nlp
-from src.utils.useful import _error_text
+from src.utils import preloader
+from src.utils.useful import _error_text, _info_text
 
 
 def _save_data(words, labels, training, output) -> None:
     """Save the trained data!"""
 
+    _info_text("Saving trained data...")
     with open(r"data\trained_data.pickle", "wb") as f:
         dump((words, labels, training, output), f)
-
+    _info_text("Saved trained data!")
 
 def _load_data() -> None:
     """Responsible of loading the chatbot data."""
 
     global data
     try:
+        _info_text("Loading raw data..")
         with open(r"data\intents.json") as file:
             data = load_json(file)
+        _info_text("Loaded raw data!")
 
     except FileNotFoundError:
-        _error_text("ERROR: intents.json is missing!")
+        _error_text("ERROR: data\intents.json is missing!")
         exit()
 
 
@@ -32,13 +35,15 @@ def _load_pretrained_data() -> None:
     global words, labels, training, output
 
     try:
+        _info_text("Loading trained data...")
         with open(r"data\trained_data.pickle", "rb") as f:
             words, labels, training, output = load(f)
             holder = [words, labels, training, output]
-            return holder
+        _info_text("Loaded trained data!")
+        return holder
 
     except FileNotFoundError:
-        _error_text("ERROR: trained_data.pickle is missing!")
+        _error_text("ERROR: data\\trained_data.pickle is missing!")
         exit()
 
 
@@ -46,13 +51,15 @@ def _load_pretrained_data() -> None:
 def _train_data() -> None:
     """Responsible of training the chatbot data once loaded."""
     
+    _info_text("Training raw data...")
     words = []
     labels = []
     docs_x = []
     docs_y = []
     for intent in data["intents"]:
         for pattern in intent["patterns"]:
-            doc = nlp(pattern)
+            pattern = preloader._text_cleaner_v2(pattern)
+            doc = preloader.nlp(pattern)
             wrds = [token.text.lower() for token in doc if not token.is_punct]
             words.extend(wrds)
             docs_x.append(wrds)
@@ -74,7 +81,7 @@ def _train_data() -> None:
         bag = []
 
         # Lemmatize the tokens using SpaCy
-        wrds = [token.lemma_ for token in nlp(" ".join(doc)) if not token.is_punct]
+        wrds = [token.lemma_ for token in preloader.nlp(" ".join(doc)) if not token.is_punct]
 
         for w in words:
             if w in wrds:
@@ -91,6 +98,7 @@ def _train_data() -> None:
     training = array(training)
     output = array(output)
 
+    _info_text("Done training raw data, now saving...")
     _save_data(words, labels, training, output) # Save the trained data!
 
 

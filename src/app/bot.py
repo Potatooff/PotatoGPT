@@ -1,14 +1,14 @@
 # Modules
 from src.utils.training import _loader
 from time import sleep
-from string import punctuation
 from random import choice as randomizer
 from numpy import argmax, array
 from fuzzywuzzy.fuzz import token_set_ratio
 from keras.models import Sequential
 from tensorflow import keras
-from src.utils.preloader import nlp
-
+from src.utils import preloader
+from src.utils import useful
+from colorama import Fore, Style
 
 
 
@@ -32,37 +32,34 @@ def _fuzzy_bag_of_words(s, words):
     bag = [0 for _ in range(len(words))]
 
     # Tokenize and lemmatize the input string using SpaCy
-    s_doc = nlp(s)
+    s_doc = preloader.nlp(s)
     s_words = [token.lemma_ for token in s_doc if not token.is_punct]
 
     for se in s_words:
         for i, w in enumerate(words):
-            if token_set_ratio(w, se) >= 70:
+            if token_set_ratio(w, se) >= 75:
                 bag[i] = 1
 
     return array(bag)
 
 
 def _typing_effect(text):
-    """ Typing effects"""
+    """ CLI bot typing effects"""
 
     for char in text:
-        print(char, end="", flush=True)
+        print((Fore.CYAN + char + Style.RESET_ALL), end="", flush=True)
         sleep(0.05)
     print("\n")
 
 
-def _clean_text(text):
-    """Remove punctuation"""
-
-    corrected = text.lower()
-    cleaned_text = corrected.translate(str.maketrans("", "", punctuation))
-    return cleaned_text
-
 
 model = Sequential() # Defining model
-def train_ai(save:bool = False):
 
+
+def train_ai(save: bool=False):
+    """Train the model"""
+
+    useful._info_text("Starting the training of Potato-GPT model...")
     # Input Layer
     model.add(keras.layers.InputLayer(input_shape=(None, len(training[0]))))
 
@@ -130,38 +127,54 @@ def train_ai(save:bool = False):
         verbose=1,
     )
 
+    
+    model.summary()
+
     if save:
+        useful._info_text("Saving Potato-GPT model...")
         model.save(r"model\potato.keras")
 
-# train_ai(save=True)   Uncomment this if you want to train ai - set save to False if you dont wanna save the trained model!
+#train_ai(save=True) # - Uncomment to train ai
 
 def load_ai():
     """Load the model"""
+    try:
+        useful._info_text("Loading Potato-GPT model...")
+        model = keras.models.load_model(r"model\potato.keras")
+        model.summary()
+        useful._info_text("Done Loading Potato-GPT model...")
+        return model
+    
+    except:
+        
+        train_ai(True)
 
-    model = keras.models.load_model(r"model\potato.keras")
-    return model
+        
 
-model = load_ai()
+model = load_ai() # Load ai if there ai
 
 def _chatbot():
     """Chatbot"""
 
+    useful._info_text("Potato-GPT connected...")
+
     while True:
-        inp = input("User: ")
-        inp = _clean_text(inp)  # clean input
+        inp = useful._input_text("User: ")
+        inp = preloader._text_cleaner_v2(inp)  # clean input
         bag_of_words = _fuzzy_bag_of_words(inp, words)
         # Reshape the bag_of_words to match the model's input shape
         input_data = bag_of_words.reshape(1, -1)
         
         results = model.predict(input_data)  # predict the response
         results_index = argmax(results)
+
         if results_index < len(labels):
             tag = labels[results_index]
 
-            if results[0][results_index] > 0.75:
+            if results[0][results_index] > 0.70: # Increase value to increase accuracy - Can also make bot limited
                 for tg in data["intents"]:
                     if tg['tag'] == tag:
                         responses = tg['responses']
-                _typing_effect(f"Potato-GPT: {randomizer(responses)}")  # animation
+                _typing_effect(f"BOT: {randomizer(responses)}")  # animation
                 continue
-        _typing_effect(randomizer(idk))  # animation
+        _typing_effect(f"BOT: {randomizer(idk)}")  # animation
