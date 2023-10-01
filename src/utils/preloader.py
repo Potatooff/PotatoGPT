@@ -17,6 +17,7 @@ except:
 
 
 def _text_cleaner_v2(text: str, punc: bool = True) -> str:
+
     """Clean the text from punctuation and stopwords!\n
     args:
         text: str - The text to clean
@@ -38,3 +39,17 @@ def _text_cleaner_v2(text: str, punc: bool = True) -> str:
     filtered_text: str = ' '.join(filtered_words) # Join the filtered words back into a sentence
 
     return filtered_text
+
+
+def _download_nltk_stopwords() -> None:
+    """Download the nltk stopwords!"""
+
+    try:
+        _info_text("Downloading nltk stopwords...")
+        from nltk import download
+        download('stopwords')
+        _info_text("Downloaded nltk stopwords!")
+
+    except:
+        _error_text("ERROR: An error downloading the nltk stopwords!")
+        exit()
