@@ -133,7 +133,7 @@ def train_ai(save:bool = False):
     if save:
         model.save(r"model\potato.keras")
 
-train_ai(save=True)
+# train_ai(save=True)   Uncomment this if you want to train ai - set save to False if you dont wanna save the trained model!
 
 def load_ai():
     """Load the model"""
@@ -162,6 +162,6 @@ def _chatbot():
                 for tg in data["intents"]:
                     if tg['tag'] == tag:
                         responses = tg['responses']
-                _typing_effect(f"BOT: {randomizer(responses)}")  # animation
+                _typing_effect(f"Potato-GPT: {randomizer(responses)}")  # animation
                 continue
         _typing_effect(randomizer(idk))  # animation
