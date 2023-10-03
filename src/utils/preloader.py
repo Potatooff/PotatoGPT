@@ -48,8 +48,9 @@ def _download_nltk_stopwords() -> None:
         _info_text("Downloading nltk stopwords...")
         from nltk import download
         download('stopwords')
-        _info_text("Downloaded nltk stopwords!")
+        download('punkt')
+        
+        return True
 
     except:
-        _error_text("ERROR: An error downloading the nltk stopwords!")
-        exit()
+        return False

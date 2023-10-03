@@ -9,8 +9,11 @@ from tensorflow import keras
 from src.utils import preloader
 from src.utils import useful
 from colorama import Fore, Style
+from src.utils import databasey
+from src.utils.values import *
 
 
+last_layer: int = len(databasey._tags_parser())
 
 words, labels, training, output, data = _loader() # DATA LOADER
 
@@ -37,7 +40,7 @@ def _fuzzy_bag_of_words(s, words):
 
     for se in s_words:
         for i, w in enumerate(words):
-            if token_set_ratio(w, se) >= 75:
+            if token_set_ratio(w, se) >= 70:
                 bag[i] = 1
 
     return array(bag)
@@ -70,11 +73,6 @@ def train_ai(save: bool=False):
         use_bias=True   
     ))
 
-    model.add(keras.layers.Dense(
-        units=512,
-        activation='relu',
-        use_bias=True   
-    ))
 
     model.add(keras.layers.Dense(
         units=256,
@@ -82,11 +80,6 @@ def train_ai(save: bool=False):
         use_bias=True 
     ))
 
-    model.add(keras.layers.Dense(
-        units=128,
-        activation='relu',
-        use_bias=True   
-    ))
 
     model.add(keras.layers.Dense(
         units=64,
@@ -95,7 +88,7 @@ def train_ai(save: bool=False):
     ))
 
     model.add(keras.layers.Dense(
-        units=32,
+        units=last_layer,
         activation='relu',
         use_bias=True
     ))
@@ -120,9 +113,9 @@ def train_ai(save: bool=False):
     model.fit(
         training,
         output,
-        epochs=200,
-        batch_size=16,
-        validation_split=0.25,
+        epochs=150,
+        batch_size=12,
+        validation_split=0.15,
         shuffle=True,
         verbose=1,
     )
@@ -132,26 +125,25 @@ def train_ai(save: bool=False):
 
     if save:
         useful._info_text("Saving Potato-GPT model...")
-        model.save(r"model\potato.keras")
+        model.save(model_path)
 
-#train_ai(save=True) # - Uncomment to train ai
+train_ai(save=True) # - Uncomment to train ai
 
 def load_ai():
     """Load the model"""
     try:
         useful._info_text("Loading Potato-GPT model...")
-        model = keras.models.load_model(r"model\potato.keras")
+        model = keras.models.load_model(model_path)
         model.summary()
         useful._info_text("Done Loading Potato-GPT model...")
         return model
     
     except:
-        
         train_ai(True)
 
         
 
-model = load_ai() # Load ai if there ai
+#model = load_ai() # Load ai if there ai
 
 def _chatbot():
     """Chatbot"""
@@ -159,8 +151,9 @@ def _chatbot():
     useful._info_text("Potato-GPT connected...")
 
     while True:
-        inp = useful._input_text("User: ")
-        inp = preloader._text_cleaner_v2(inp)  # clean input
+        inp = useful._input_text(f"{user_username}: ")
+        #inp = preloader._text_cleaner_v2(inp)  # clean input
+        print(inp)
         bag_of_words = _fuzzy_bag_of_words(inp, words)
         # Reshape the bag_of_words to match the model's input shape
         input_data = bag_of_words.reshape(1, -1)
@@ -171,10 +164,10 @@ def _chatbot():
         if results_index < len(labels):
             tag = labels[results_index]
 
-            if results[0][results_index] > 0.70: # Increase value to increase accuracy - Can also make bot limited
-                for tg in data["intents"]:
-                    if tg['tag'] == tag:
-                        responses = tg['responses']
-                _typing_effect(f"BOT: {randomizer(responses)}")  # animation
+            if results[0][results_index] > 0.40: # Increase value to increase accuracy - Can also make bot limited
+                responses = databasey._responses_parser(tag) 
+
+                _typing_effect(f"{bot_username}: {randomizer(responses)}")  # animation
                 continue
-        _typing_effect(f"BOT: {randomizer(idk)}")  # animation
+
+        _typing_effect(f"{bot_username}: {randomizer(idk)}")  # animation

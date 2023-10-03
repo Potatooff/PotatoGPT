@@ -4,15 +4,17 @@ from pickle import dump, load
 from numpy import array
 from src.utils import preloader
 from src.utils.useful import _error_text, _info_text
+from src.utils.values import raw_data_path, trained_data_path
 
-
+print(raw_data_path)
 def _save_data(words, labels, training, output) -> None:
     """Save the trained data!"""
 
     _info_text("Saving trained data...")
-    with open(r"data\trained_data.pickle", "wb") as f:
+    with open(trained_data_path, "wb") as f:
         dump((words, labels, training, output), f)
     _info_text("Saved trained data!")
+
 
 def _load_data() -> None:
     """Responsible of loading the chatbot data."""
@@ -20,7 +22,7 @@ def _load_data() -> None:
     global data
     try:
         _info_text("Loading raw data..")
-        with open(r"data\intents.json") as file:
+        with open(raw_data_path) as file:
             data = load_json(file)
         _info_text("Loaded raw data!")
 
@@ -36,7 +38,7 @@ def _load_pretrained_data() -> None:
 
     try:
         _info_text("Loading trained data...")
-        with open(r"data\trained_data.pickle", "rb") as f:
+        with open(trained_data_path, "rb") as f:
             words, labels, training, output = load(f)
             holder = [words, labels, training, output]
         _info_text("Loaded trained data!")

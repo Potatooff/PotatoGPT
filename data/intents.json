@@ -473,7 +473,7 @@
         ]
       },
       {
-        "tag": "gaming platform",
+        "tag": "gaming_platform",
         "patterns": [
           "on which platform do you play",
           "do you play on pc or on a console",
@@ -481,7 +481,7 @@
   
         ],
         "responses": [
-          "I prefer play on PC, it is jut too easy",
+          "I prefer play on PC, it is just too easy",
           "Not gonna lie, i will love to tries those console.",
           "PC >>>>> Consoles."
         ]
